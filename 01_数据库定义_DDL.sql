@@ -183,7 +183,7 @@ CREATE TABLE t3(
 	register_time datetime DEFAULT current_timestamp comment '插入自动维护时间',
 	#update_time timestamp DEFAULT current_timestamp ON UPDATE current_timestamp comment '插入维护时间 修改数据自动更新时间',
 	update_time timestamp DEFAULT NULL ON UPDATE current_timestamp comment '插入不占时间 修改数据自动更新时间'
-)
+);
 
 SELECT * FROM t3;
 
@@ -203,12 +203,59 @@ CREATE TABLE IF NOT EXISTS student(
 
 SELECT * FROM student;
 
+/*
+2.8 修改和删除表
+	修改表中列
+	  添加列
+	  alter table 表名 add 列名 类型 [first | after 原列名]
+	  修改列名
+	  alter table 表名 change 原列名 新列名 新类型 [first | after 原列名]
+	  修改列类型
+	  alter table 表名 modify 列名 新类型 [first | after 原列名]
+	  删除列
+	  alter table 表名 drop 列名
+	修改表名
+	  alter table 表名 rename [to] 新的表名
+	删除表
+	  drop table [if exists] 表名
+	清空表数据
+	  truncate table 表名 # 删除表中数据 + 删除表的关联记录
+*/
 
+CREATE TABLE employess(
+	emp_num INT,
+	last_name VARCHAR(50),
+	first_name VARCHAR(50),
+	mobile VARCHAR(25),
+	code INT,
+	job_title VARCHAR(50),
+	birth DATE,
+	note VARCHAR(255),
+	sex VARCHAR(5)
+)
 
+DESC employess;
 
+#将表employess的mobile字段修改到code字段后面
+ALTER TABLE employess MODIFY mobile VARCHAR(25) AFTER code;
 
+#将表employess的birth字段改名为birthday
+ALTER TABLE employess CHANGE birth birthday DATE;
 
+#修改sex字段 数据类型为char(1)
+ALTER TABLE employess MODIFY sex CHAR(1);
 
+#删除字段note
+ALTER TABLE employess DROP note;
+
+#增加字段名favoriate_activity 数据类型为VARCHAR(100)
+ALTER TABLE employess ADD favoriate_activity VARCHAR(100);
+
+#将表employess的名称修改为employees_info
+ALTER TABLE employess RENAME employees_info;
+
+SHOW tables;
+DESC employees_info;
 
 
 
