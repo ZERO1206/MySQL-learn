@@ -119,7 +119,7 @@ SHOW TABLES FROM book_libs;
 
 /*
 2.4 建表类型（浮点/定值）
-	浮点类型（类型 M D）
+	浮点类型（类型 M D）M(小数+整数位数)	D(小数位数)
 		float(m,d)	4字节	m 24	d 8
 		double(m,d)	8字节	m 53	d 30
 	定值类型（类型 M D）
@@ -138,8 +138,8 @@ SHOW TABLES FROM book_libs;
 		2.char声明了最大长度限制 输入的文本小于长度限制 会在右侧补全空格 char(5) -> 'abc' -> 'abc  '
 		3.char类型在读取的时候 会自动去掉右侧的空格 'abc ' -> 'abc'
 		4.varchar声明的时候 必须添加m限制 varchar(m)
-		5.mysql14.0以下版本 varchar(20) -> 20字节限制 mb3 -> 6
-		6.mysql15.0以上版本 varchar(20) -> 20字节限制
+		5.mysql4.0以下版本 varchar(20) -> 20字节限制 mb3 -> 6
+		6.mysql5.0以上版本 varchar(20) -> 20字符限制
 		7.varchar类型中识别空格 插入空格 读取也是有空格
 		
 	演示varchar最大限制
@@ -156,10 +156,52 @@ SHOW TABLES FROM book_libs;
 CREATE TABLE IF NOT EXISTS t2(
 	name1 varchar(16000),
 	name2 TEXT
-)charset=utf8mb4;
+) charset=utf8mb4;
 
+SHOW TABLES FROM book_libs;
 
+/*
+2.7 建表类型(时间类型)
+	时间类型
+		year	1字节	yyyy|yy
+		time	3字节	HH:MM:SS
+		date	3字节	YY-MM-DD
+		datetime	8字节	YY-MM-DD HH:MM:SS
+		timestamp	4字节	YY-MM-DD HH:MM:SS
+	注意情况
+		1.year类型有两位或者四位的表达形式 两位 00*69 = 2000-2069	70-99 = 1970-1999	
+		2.时间类型就是一个特殊格式的字符串 插入数据的时候‘’ 时间类型需要自动赋值 需要手动添加相关的设置
+	扩展自动填写时间：
+		1.插入默认添加时间
+			datetime | timestamp default current_timestamp;
+		2.修改默认更改时间(插入的默认时间)
+			datetime | timestamp default current_timestamp on update current_timestamp;
+*/
 
+CREATE TABLE t3(
+	name varchar(20),
+	register_time datetime DEFAULT current_timestamp comment '插入自动维护时间',
+	#update_time timestamp DEFAULT current_timestamp ON UPDATE current_timestamp comment '插入维护时间 修改数据自动更新时间',
+	update_time timestamp DEFAULT NULL ON UPDATE current_timestamp comment '插入不占时间 修改数据自动更新时间'
+)
+
+SELECT * FROM t3;
+
+CREATE DATABASE book_libs CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_as_cs;
+
+USE book_libs;
+
+CREATE TABLE IF NOT EXISTS student(
+	stu_name VARCHAR(10) COMMENT '学生的姓名',
+	stu_sex CHAR COMMENT '学生的性别',
+	stu_age TINYINT UNSIGNED COMMENT '年龄',
+	stu_height DOUBLE(4,1) COMMENT '身高',
+	stu_birthday DATE COMMENT '生日',
+	stu_register TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT '注册日期 插入自动维护',
+	stu_update TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新日期 插入更新自动维护'
+);
+
+SELECT * FROM student;
 
 
 
