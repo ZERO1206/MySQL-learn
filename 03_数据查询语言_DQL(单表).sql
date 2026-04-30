@@ -185,16 +185,60 @@ SELECT * FROM t_employee WHERE gender = '男' AND FIND_IN_SET('上海', work_pla
 #查询薪资大于5000且工作地点为'北京'或者'上海'的员工信息
 SELECT * FROM t_employee WHERE salary > 5000 AND (FIND_IN_SET('北京', work_place) > 0 OR FIND_IN_SET('上海', work_place) > 0);
 
+#3.7 运算符优先级和结合性
+#1.（）圆括号---最高优先级的运算符
+SELECT * FROM TABLE WHERE (a+b)*c>d;
+#2.一元运算符 -（符号）、 ！（非）、 ～（按位反）等
+SELECT !1+1;
+#3.算法运算符 *、/、%、DIV、MOD
+SELECT 1+1*2;
+#4.算术运算符 + -
+SELECT 1+2*3>=2
+#5.比较运算符 = > >= < <= != is LIKE IN等
+#6.逻辑运算符 AND OR XOR
+SELECT 1>1 AND 1=1;
 
+#4.3 单行函数---数值函数
+/*
+abs()---取绝对值  ceil()---向上取整  floor()---向下取整  rand()---完全随机数  rand(x)---固定随机数x
+round(x)---四舍五入取整  round(x,y)---指定精度(保留y位小数 对y+1位小数四舍五入) truncate(x,y)---保留y位小数不进行四舍五入
+*/
+SELECT ABS(-5), CEIL(2.3), CEIL(-2.3), FLOOR(2.3), FLOOR(-2.3), RAND(), RAND(8),
+       ROUND(2.3), ROUND(2.36,1), TRUNCATE(2.36,1); 
 
+#4.4 单行函数---字符串函数
+/*
+char_length(字符)---返回字符数  concat(x,x,x,x)---字符拼接  find_in_set(x,y)---在y的数据中找x出现的位置
+!! find_in_set(x,y)  y是一种set数据格式 从'x,x,x,x'中找x的存在的位置 位置从1开始 找到第一个出现的位置截至
+*/
+SELECT CHAR_LENGTH('abc'), CONCAT('%','md','fuck'), FIND_IN_SET('aa', 'cc,dd,aa,cv,aa,gg');
 
+#4.5 单行函数---时间函数
+/*
+获取当前时间:
+	now()---返回当前系统日期和时间  curdate()---只返回当前日期  curtime()---值返回当前时间 考虑系统时区
+	utc_date() utc_time() 不考虑系统时区
+时间部分提取:
+	year(时间)---年  month(时间)---月  week(时间)---周  weekday(时间)---星期几(0是星期一) 
+	dayofweek(时间)---星期几(1是星期天)
+时间运算:
+	adddate | date_add (时间锚点, interval +-值 运算的时间单位的英文[day month year...])
+	subdate | date_sub (时间锚点, interval +-值 运算的时间单位的英文[day month year...])
+	addtime(时间,秒)---时间的+-秒运算
+	datediff(日期,日期)---算两个日期之间间隔天数
+	timediff(时间,时间)---算两个时间间隔时差 时:分:秒
+时间格式化函数:
+	date_format(时间,'格式字符串') time_format(时间,'格式字符串') --- 格式化时间生成一个自定义格式的时间字符串
+	str_to_date('非标注时间字符串','非标注时间字符串对应的格式') --- 非标注时间字符串 --- 转成标注时间
+*/
+SELECT NOW(), CURDATE(), CURTIME(), UTC_DATE(), UTC_TIME(), YEAR(NOW()), MONTH(NOW()), 
+	   WEEK(NOW()), WEEKDAY(NOW()), DAYOFWEEK(NOW());
 
+SELECT ADDDATE(NOW(),INTERVAL 1 MONTH), ADDDATE(NOW(),INTERVAL -1 MONTH), ADDTIME('10:10:10',20),
+	   DATEDIFF(CURDATE(),'2024-11-11'), TIMEDIFF(CURTIME(),'10:00:00');
 
-
-
-
-
-
+SELECT DATE_FORMAT(NOW(),'%Y年%m月%d日'), TIME_FORMAT(NOW(),'%H:%i:%s'), 
+	   STR_TO_DATE('2024年12月15日','%Y年%m月%d日');
 
 
 
