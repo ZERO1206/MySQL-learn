@@ -240,18 +240,53 @@ SELECT ADDDATE(NOW(),INTERVAL 1 MONTH), ADDDATE(NOW(),INTERVAL -1 MONTH), ADDTIM
 SELECT DATE_FORMAT(NOW(),'%Y年%m月%d日'), TIME_FORMAT(NOW(),'%H:%i:%s'), 
 	   STR_TO_DATE('2024年12月15日','%Y年%m月%d日');
 
+#查询今天过生日的员工信息
+SELECT * FROM t_employee WHERE DAY(birthday) = DAY(NOW()) AND MONTH(birthday) = MONTH(NOW());
+SELECT * FROM t_employee WHERE DATE_FORMAT(birthday,'%m-%d') = DATE_FORMAT(NOW(),'%m-%d'); 
 
+#查询本月过生日的员工信息
+SELECT * FROM t_employee WHERE MONTH(birthday) = MONTH(NOW());
 
+#查询下月过生日的员工信息
+SELECT * FROM t_employee WHERE MONTH(birthday) = MONTH(NOW()) + 1;
 
+#查询员工姓名、工资、年龄(保留1位小数点)信息
+SELECT ename AS 姓名, salary 工资, ROUND(DATEDIFF(NOW(),birthday)/365,1) 年龄 FROM t_employee;
 
+/*
+4.7 单行函数---流程函数
+	if(表达式,true_value,false_value)  if函数处理有两个结果的流程
+	ifnull(列名,null_value)  处理列等于null的时候 我们赋予其他的默认值
+	case关键字：处理多流程结果
+		第一种语法：case when 表达式1 then result1 when 表达式2 then result2 ... else default_value end [as 别名]
+		第二种语法：case 列名 | 表达式 when 值 then result when 值 then 结果 ... else default_value end ...
+ */
 
+#查询员工生日 如果生日在1990年之前 则薪资涨幅为当前薪资的10% 否则为5%
+SELECT ename, salary, birthday, IF(YEAR(birthday)>1990,salary*1.05,salary*1.1) AS newSalary FROM t_employee;
 
+#查询员工编号和姓名 以及生成一个type列 更具体显示男女员工
+SELECT eid, ename, gender, IF(gender='男','男员工','女员工') AS TYPE FROM t_employee;
 
+#查询员工的姓名、工资和奖金数额(奖金数额=salary*commission_pct)
+SELECT ename, salary, salary*IFNULL(commission_pct, 0.05) AS 奖金数额 FROM t_employee;
 
-
-
-
-
+#查询姓名、性别以及补助金额(补助按照性别基准值*commission_pct) 男性基准2000 女性基准3000
+#其他0 commission_pct为null算0.1比例
+#基于case when
+SELECT ename, gender, commission_pct,
+	   CASE
+		 WHEN gender = '男' THEN 2000*IFNULL(commission_pct,0.1)
+		 WHEN gender = '女' THEN 3000*IFNULL(commission_pct,0.1)
+		 ELSE 0
+		END AS 补助金额 FROM t_employee;
+#基于case 列名|表达式 when value then result
+SELECT ename, gender, commission_pct,
+	   CASE gender
+		 WHEN '男' THEN 2000*IFNULL(commission_pct,0.1)
+		 WHEN '女' THEN 3000*IFNULL(commission_pct,0.1)
+		 ELSE 0
+		END AS 补助金额 FROM t_employee;
 
 
 
