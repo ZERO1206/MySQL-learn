@@ -129,7 +129,7 @@ SELECT * FROM t_employee WHERE eid%2 = 0;
 	<> 标准语法 !=(mysql方言)
 	大于、小于、大于等于、小于等于 > < >= <=
 	空值处理
-	if null      is not null
+	is null      is not null
 	区间比较
 	between [min] and [max]      not between [min] and [max]
 	范围比较
@@ -288,7 +288,144 @@ SELECT ename, gender, commission_pct,
 		 ELSE 0
 		END AS 补助金额 FROM t_employee;
 
+/*
+4.6 多行函数---聚合函数
+	avg(列名->平均值->数值类型)
+	sum(列名->数值和->数值类型)
+	min|max(列名->最大值|最小值->任意类型)
+	count(列名|*|1->总数量【列名】列非空值出现的次数| 【1|*】总条数->任意类型)
+	聚合函数不处理NULL情况
+	聚合函数之间不能嵌套
+ */
+#求平均工资 最小和最大工资以及总工资
+SELECT AVG(salary),MIN(salary),MAX(salary),SUM(salary) FROM t_employee;
 
+#求最大年龄和最小年龄的员工生日
+SELECT MAX(birthday) AS 年龄最小员工生日, MIN(birthday) AS 年龄最大员工生日 FROM t_employee;
+
+#求总员工数和有奖金的员工数
+SELECT COUNT(*), COUNT(1), COUNT(commission_pct) FROM t_employee;
+
+/*
+5.1 分组查询
+	分组是将数据行分成若干个小组
+	最终统计的是组的特性和数据（分组列、聚合函数）
+	group by 分组列、分组列...having 分组后的比较
+	1.分组查询只能查询的就是分组字段和聚合函数
+	2.having是分组后的条件|where是分组前的条件
+ */
+
+#查询每种性别的员工数量以及性别平均工资（先按照性别gender列分组 分组以后统计分组特性列和聚合函数即可）
+SELECT gender, COUNT(*), AVG(salary) FROM t_employee GROUP BY gender; 
+
+#查询生日年份、性别相同的人数和平均工资
+SELECT YEAR(birthday), gender, COUNT(*), AVG(salary) FROM t_employee GROUP BY YEAR(birthday), gender;
+
+#查询工资高于5000 每种性别的员工数量以及平均工资
+SELECT gender, count(*), AVG(salary) FROM t_employee WHERE salary > 5000 GROUP BY gender;
+
+#查询平均工资高于11000的性别和性别人数
+SELECT gender, COUNT(*),  AVG(salary) FROM t_employee GROUP BY gender HAVING AVG(salary) > 11000; 
+#having是分组后的条件 where是分组前的条件
+#having只能在group by后面出现 where随时可以出现
+#having比较一般都是聚合函数
+#having可以使用select后面查询到的列的名称 || having在分组之后执行
+
+/*
+5.2 排序查询
+	order by 列名 asc|desc, 列名 asc|desc
+	asc正序 从小到大 desc倒序 从大到小
+	asc 默认值 可以不写 order by price, xxx desc;
+ */
+
+#按照年龄正序排序 查询员工信息
+SELECT * FROM t_employee ORDER BY birthday DESC;
+
+#按照工资倒序 查询员工信息
+SELECT * FROM t_employee ORDER BY salary DESC;
+
+#按照工资倒序 如果工资相同 按照年龄正序排序 查询员工信息
+SELECT * FROM t_employee ORDER BY salary DESC, birthday DESC;
+
+#查询有奖金的员工 按照工资倒序显示员工信息
+SELECT * FROM t_employee WHERE commission_pct IS NOT NULL ORDER BY salary DESC;
+
+/*
+5.3 切割查询
+	limit [offset偏移量 , ] number;
+	offset可以省略 偏移量0的时候 从头开始查询 limit 0, 5 == limit 5;
+	limit关键字会影响数据 limit放在select语句后面
+ */
+
+#查询工资最高的员工信息
+SELECT * FROM t_employee ORDER BY salary DESC LIMIT 0, 1;
+
+#查询工资第二高的员工信息
+SELECT * FROM t_employee ORDER BY salary DESC LIMIT 1, 1;
+
+#查询工资最高的女性的员工信息
+SELECT * FROM t_employee WHERE gender = '女' ORDER BY salary DESC LIMIT 1;
+
+/*
+关键字的顺序：
+	select 列名 from 表 where 条件 and | or 条件 group by 分组字段,分组字段 having 分组后条件
+	order by 列名 asc | desc , 列名 asc | desc limit offset, number;
+关键字执行的顺序：
+	from 数据源 where 筛选前置条件 group by 分组 having 分组后的数据过滤 select 显示列的信息 
+	order by 排序 limit 切割 	
+ */
+
+#创建数据库test01_library
+CREATE DATABASE IF NOT EXISTS test01_library CHARACTER SET 'utf8';
+#指定使用数据库
+USE test01_library;
+#创建表books
+CREATE TABLE IF NOT EXISTS books(
+	id INT,
+	name VARCHAR(50),
+	authors VARCHAR(100),
+	price FLOAT,
+	pubdate YEAR,
+	note VARCHAR(100),
+	num INT
+);
+#向books表中插入记录
+#1）不指定字段名称 插入一条记录
+INSERT INTO books VALUES(1,'Tal of AAA', 'Dickes', 23, 1995, 'novel', 11);
+#2)指定所有字段名称 插入一条数据
+INSERT INTO books(id,name,authors,price,pubdate,note,num) VALUES(2,'EmmaT','Jane lura',35,1993,'Joke',22);
+#3)同时插入多条记录
+INSERT INTO books (id, NAME, authors, price, pubdate, note, num) VALUES
+(3, 'Story of Jane', 'Jane Tim', 40, 2001, 'novel', 0),
+(4, 'Love Day', 'George Byron', 20, 2005, 'novel', 30),
+(5, 'Old Land', 'Honore Blaze', 30, 2010, 'law', 0),
+(6, 'The Battle', 'Upton sata', 30, 1999, 'medicine', 40),
+(7, 'Rose Hood', 'Richard Haggard', 28, 2008, 'cartoon', 28) ;
+
+#将小说类型的书的价格都增加5
+UPDATE books SET price = price + 5 WHERE note = 'novel';
+#将名称为EmmaT的书的价格改为40 并将类型改为drama
+UPDATE books SET price = 40, note = 'drama' WHERE name = 'EmmaT';
+#删除库存为0的记录
+DELETE FROM books WHERE num = 0;
+#统计书名中包含a字母的书
+SELECT * FROM books WHERE name LIKE '%a%';
+#统计书名中包含a字母的书的数量和库存总量
+SELECT COUNT(1), SUM(num) FROM books WHERE name LIKE '%a%';
+#找出'novel'类型的书 按照价格降序排列
+SELECT * FROM books WHERE note = 'novel' ORDER BY price DESC;
+#查询图书信息 按照库存量降序排列 如果库存量相同 按照note升序排列
+SELECT * FROM books ORDER BY num DESC, note ASC;
+#按照note分类统计书的数量
+SELECT note, COUNT(1) FROM books GROUP BY note; 
+#按照note分类统计书的库存量 显示库存量超过30本的书
+SELECT note, SUM(num) AS nm FROM books GROUP BY note HAVING nm > 30; 
+#查询所有图书 每页显示4本 显示第二页分页查询
+SELECT * FROM books LIMIT 4,4;
+#按照note分类统计书的库存量 显示库存量最多的
+SELECT note, SUM(num) AS nm FROM books GROUP BY note ORDER BY nm DESC LIMIT 1; 
+#查询书名达到5个字符的书 不包含里面的空格
+SELECT * FROM books WHERE CHAR_LENGTH(REPLACE(name,' ','')) > 5;
 
 
 
